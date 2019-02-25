@@ -57,6 +57,26 @@ public class AuthorizationManager {
 
         return url
     }
+    
+    internal func getFacebookAuthUrl(idpName : String?, accessToken : String?, responseType : String) -> String? {
+        guard let state = Utils.generateStateParameter(of: 24) else {
+            return nil
+        }
+        self.state = state
+        
+        var url = "https://www.facebook.com/dialog/oauth&" + AppIDConstants.JSON_RESPONSE_TYPE_KEY + "=" + responseType
+        
+        if let clientId = self.registrationManager.getRegistrationDataString(name: AppIDConstants.client_id_String) {
+            url += "&" + AppIDConstants.client_id_String + "=" + clientId
+        }
+        url +=  "&" + AppIDConstants.JSON_REDIRECT_URI_KEY + "=" + Config.getServerUrl(appId: self.appid) + "/Facebook/callback"
+        url += "&" + AppIDConstants.JSON_SCOPE_KEY + "=" + "public_profile%20email"
+        
+        url = addLocaleQueryParam(url)
+        url += "&state=" + state
+        
+        return url
+    }
 
     internal func getChangePasswordUrl(userId : String, redirectUri : String) -> String {
         var url = Config.getServerUrl(appId: self.appid) + AppIDConstants.changePasswordPath + "?" + AppIDConstants.JSON_USER_ID + "=" + userId
@@ -98,6 +118,24 @@ public class AuthorizationManager {
                 return
             }
             guard let authorizationUrl = self.getAuthorizationUrl(idpName: nil, accessToken: accessTokenString, responseType: AppIDConstants.JSON_CODE_KEY) else {
+                AuthorizationManager.logger.error(message: "Could not generate authorization url")
+                authorizationDelegate.onAuthorizationFailure(error: .authorizationFailure("Could not generate authorization url"))
+                return
+            }
+            let redirectUri = self.registrationManager.getRegistrationDataString(arrayName: AppIDConstants.JSON_REDIRECT_URIS_KEY, arrayIndex: 0)
+            self.authorizationUIManager = AuthorizationUIManager(oAuthManager: self.oAuthManager, authorizationDelegate: authorizationDelegate, authorizationUrl: authorizationUrl, redirectUri: redirectUri!)
+            self.authorizationUIManager?.launch()
+        }
+    }
+    
+    internal func launchAuthorizationFacebookUI(accessTokenString:String? = nil, authorizationDelegate:AuthorizationDelegate) {
+        self.registrationManager.ensureRegistered { (error: AppIDError?) in
+            guard error == nil else {
+                AuthorizationManager.logger.error(message: error!.description)
+                authorizationDelegate.onAuthorizationFailure(error: AuthorizationError.authorizationFailure(error!.description))
+                return
+            }
+            guard let authorizationUrl = self.getFacebookAuthUrl(idpName: nil, accessToken: accessTokenString, responseType: AppIDConstants.JSON_CODE_KEY) else {
                 AuthorizationManager.logger.error(message: "Could not generate authorization url")
                 authorizationDelegate.onAuthorizationFailure(error: .authorizationFailure("Could not generate authorization url"))
                 return

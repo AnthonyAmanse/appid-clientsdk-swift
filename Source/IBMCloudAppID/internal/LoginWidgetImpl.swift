@@ -25,7 +25,7 @@ public class LoginWidgetImpl: LoginWidget {
     }
     
     public func launchFacebookLogIn(accessTokenString: String? = nil, delegate: AuthorizationDelegate) {
-        self.oauthManager.authorizationManager?.launchAuthorizationUI(accessTokenString: accessTokenString, authorizationDelegate: delegate)
+        self.oauthManager.authorizationManager?.launchAuthorizationFacebookUI(accessTokenString: accessTokenString, authorizationDelegate: delegate)
     }
 
     public func launchSignUp(_ delegate: AuthorizationDelegate) {
