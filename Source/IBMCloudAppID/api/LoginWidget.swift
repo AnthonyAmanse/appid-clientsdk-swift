@@ -15,6 +15,7 @@ import Foundation
 
 public protocol LoginWidget {
     func launch(accessTokenString: String?, delegate: AuthorizationDelegate)
+    func launchFacebookLogIn(accessTokenString: String?, facebookAppId: String?, delegate: AuthorizationDelegate)
     func launchSignUp(_ delegate: AuthorizationDelegate)
     func launchChangePassword(_ delegate: AuthorizationDelegate)
     func launchChangeDetails(_ delegate: AuthorizationDelegate)
