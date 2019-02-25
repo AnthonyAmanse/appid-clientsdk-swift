@@ -64,7 +64,7 @@ public class AuthorizationManager {
         }
         self.state = state
         
-        var url = "https://www.facebook.com/dialog/oauth&" + AppIDConstants.JSON_RESPONSE_TYPE_KEY + "=" + responseType
+        var url = "https://www.facebook.com/dialog/oauth?" + AppIDConstants.JSON_RESPONSE_TYPE_KEY + "=" + responseType
         
         if let clientId = facebookAppId {
             url += "&" + AppIDConstants.client_id_String + "=" + clientId
@@ -74,6 +74,8 @@ public class AuthorizationManager {
         
         url = addLocaleQueryParam(url)
         url += "&state=" + state
+        
+        print(url)
         
         return url
     }
